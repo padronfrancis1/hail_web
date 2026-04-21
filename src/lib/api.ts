@@ -1,0 +1,64 @@
+import type { DetectionResult, Detection } from "@/lib/types";
+
+interface DetectOptions {
+  preprocess?: boolean;
+  scoreThreshold?: number;
+}
+
+interface RawDetection {
+  label_id: 1 | 2;
+  label_name: "dent" | "false_positive";
+  score: number;
+  box: [number, number, number, number];
+  polygon: [number, number][];
+}
+
+interface RawDetectionResponse {
+  image_width: number;
+  image_height: number;
+  num_detections: number;
+  detections: RawDetection[];
+}
+
+export async function detectDents(
+  file: File,
+  opts: DetectOptions = {}
+): Promise<DetectionResult> {
+  const { preprocess = true, scoreThreshold = 0.3 } = opts;
+
+  const form = new FormData();
+  // Cloud Run requires filename to end in .jpg/.jpeg
+  const blob = file.slice(0, file.size, "image/jpeg");
+  const filename = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+  form.append("image", blob, filename);
+  form.append("preprocess", String(preprocess));
+  form.append("score_threshold", String(scoreThreshold));
+  form.append("return_image", "false");
+
+  const res = await fetch("/api/detect", {
+    method: "POST",
+    body: form,
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "Unknown error");
+    throw new Error(`Detection failed (${res.status}): ${text}`);
+  }
+
+  const raw: RawDetectionResponse = await res.json();
+
+  const detections: Detection[] = raw.detections.map((d) => ({
+    box: d.box,
+    labelId: d.label_id,
+    labelName: d.label_name,
+    score: d.score,
+    polygon: d.polygon,
+  }));
+
+  return {
+    imageWidth: raw.image_width,
+    imageHeight: raw.image_height,
+    numDetections: raw.num_detections,
+    detections,
+  };
+}

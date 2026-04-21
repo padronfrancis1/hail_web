@@ -1,65 +1,80 @@
-import Image from "next/image";
+import { DropZone } from "@/components/upload/DropZone";
+import { Separator } from "@/components/ui/separator";
+import { Upload, Cpu, ClipboardCheck } from "lucide-react";
 
-export default function Home() {
+const HOW_IT_WORKS = [
+  {
+    icon: Upload,
+    step: "1",
+    title: "Upload",
+    description:
+      "Drag and drop or browse for a JPEG/PNG photo of the vehicle panel.",
+  },
+  {
+    icon: Cpu,
+    step: "2",
+    title: "Analyze",
+    description:
+      "Our Mask R-CNN model running on Cloud Run detects and segments every dent in seconds.",
+  },
+  {
+    icon: ClipboardCheck,
+    step: "3",
+    title: "Review",
+    description:
+      "See an annotated overlay with confidence scores. Export the result or revisit from History.",
+  },
+];
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-1 flex-col">
+      {/* Hero */}
+      <section className="flex flex-col items-center gap-6 bg-gradient-to-b from-slate-50 to-white px-4 pt-16 pb-12 text-center sm:pt-20">
+        <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-medium text-red-600">
+          AI-powered · Mask R-CNN · Cloud inference
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <h1 className="max-w-2xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+          Detect hail damage{" "}
+          <span className="text-red-500">in seconds</span>
+        </h1>
+
+        <p className="max-w-xl text-base text-muted-foreground sm:text-lg">
+          Upload a photo of any vehicle panel and get instant AI-powered hail
+          dent detection with polygon-level precision — no specialist required.
+        </p>
+
+        {/* Upload zone */}
+        <div className="w-full max-w-lg">
+          <DropZone />
         </div>
-      </main>
+      </section>
+
+      <Separator />
+
+      {/* How it works */}
+      <section className="mx-auto w-full max-w-4xl px-4 py-14">
+        <h2 className="mb-10 text-center text-2xl font-semibold tracking-tight">
+          How it works
+        </h2>
+        <div className="grid gap-8 sm:grid-cols-3">
+          {HOW_IT_WORKS.map(({ icon: Icon, step, title, description }) => (
+            <div key={step} className="flex flex-col items-center gap-3 text-center">
+              <div className="relative">
+                <div className="flex size-14 items-center justify-center rounded-2xl bg-muted">
+                  <Icon className="size-6 text-muted-foreground" />
+                </div>
+                <span className="absolute -top-2 -right-2 flex size-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                  {step}
+                </span>
+              </div>
+              <h3 className="font-semibold">{title}</h3>
+              <p className="text-sm text-muted-foreground">{description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

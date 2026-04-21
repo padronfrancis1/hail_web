@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hail Detect — Client Demo Web App
 
-## Getting Started
+AI-powered hail damage detection for vehicle panels. Upload a JPEG/PNG photo and get instant polygon-level dent annotations powered by a Mask R-CNN model running on Google Cloud Run.
 
-First, run the development server:
+This is the web sibling of the Flutter mobile app at `C:\repositories\hail_app`, built for insurance and auto-body prospect demos.
+
+## Stack
+
+- **Next.js 16 App Router** + **TypeScript** (strict)
+- **Tailwind CSS v4** + **shadcn/ui** (base-nova style)
+- **idb** — IndexedDB for local inspection history
+- **lucide-react** — icons
+- **sonner** — toast notifications
+- Cloud Run API at `CLOUD_RUN_URL/detect` (Mask R-CNN backend)
+
+## Setup
 
 ```bash
+cd C:\repositories\hail_web
+npm install
+cp .env.local.example .env.local
+# Edit .env.local and set CLOUD_RUN_URL if using a different endpoint
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Description |
+|---|---|
+| `CLOUD_RUN_URL` | Base URL of the Cloud Run detection service (no trailing slash) |
 
-## Learn More
+Copy `.env.local.example` to `.env.local` and fill in the values. Never commit `.env.local`.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploying to Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Push this repo to GitHub.
+2. Go to [vercel.com/new](https://vercel.com/new) and import the repository.
+3. Under **Environment Variables**, add `CLOUD_RUN_URL` with the value `https://hail-detect-338479771343.us-east4.run.app`.
+4. Deploy. Vercel auto-detects Next.js — no extra configuration needed.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+src/
+  app/
+    layout.tsx                  Root layout: Geist font, Toaster, PageShell, InspectionProvider
+    page.tsx                    Landing page: hero + DropZone + How it works
+    results/[id]/page.tsx       Results view: overlay canvas + detection list
+    history/page.tsx            Grid of past inspections (IndexedDB)
+    api/detect/route.ts         Proxy to Cloud Run (adds 125s timeout)
+  components/
+    upload/DropZone.tsx         Drag-drop upload with preview
+    results/OverlayCanvas.tsx   Canvas rendering of detection overlay
+    results/DetectionList.tsx   Sidebar list of detections with confidence badges
+    results/SummaryBar.tsx      Summary: dent count, avg confidence, dimensions
+    history/InspectionCard.tsx  History grid card with thumbnail
+    history/InspectionGrid.tsx  Grid loader from IndexedDB
+    layout/PageShell.tsx        Sticky nav + footer
+  lib/
+    api.ts          detectDents(file, opts) -> DetectionResult
+    db.ts           IndexedDB wrapper (hail_web, v1, inspections store)
+    overlay.ts      drawOverlay(canvas, img, detections) — polygon + box + label
+    thumbnail.ts    generateThumbnail(canvas|blob) -> Blob (200px wide)
+    types.ts        Detection, DetectionResult, Inspection
+  context/
+    InspectionContext.tsx   useReducer state machine: idle | uploading | loading | done | error
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## How Inference Works
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. User drops or selects a JPEG/PNG (max 20 MB).
+2. Client POSTs to `/api/detect` (Next.js proxy route).
+3. Proxy forwards to `CLOUD_RUN_URL/detect` as `multipart/form-data` with a 125 s timeout.
+4. Response JSON contains bounding boxes and polygon contours.
+5. `overlay.ts` renders polygons + boxes + labels onto a canvas element.
+6. The overlay PNG + thumbnail are saved to IndexedDB for the history view.
+
+## Local Storage
+
+All inspections are stored client-side in IndexedDB (`hail_web` database, `inspections` store). No server-side persistence — clearing browser data removes history.
