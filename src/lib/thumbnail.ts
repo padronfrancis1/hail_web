@@ -1,5 +1,6 @@
 const THUMBNAIL_WIDTH = 200;
 
+/** Scales source down to 200 px wide and returns a JPEG Blob at 0.8 quality. Any object URL created internally is revoked before returning. */
 export async function generateThumbnail(source: HTMLCanvasElement | Blob): Promise<Blob> {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");

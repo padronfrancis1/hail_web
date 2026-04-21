@@ -23,11 +23,13 @@ function getDb(): Promise<IDBPDatabase<HailDB>> {
   return dbPromise;
 }
 
+/** Upserts an inspection record; an existing record with the same id is overwritten. */
 export async function saveInspection(inspection: Inspection): Promise<void> {
   const db = await getDb();
   await db.put("inspections", inspection);
 }
 
+/** Returns all inspections ordered by createdAt descending (newest first). */
 export async function listInspections(): Promise<Inspection[]> {
   const db = await getDb();
   const all = await db.getAllFromIndex("inspections", "by_created_at");

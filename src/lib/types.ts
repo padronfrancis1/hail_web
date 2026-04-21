@@ -1,3 +1,4 @@
+/** A single detected region: bounding box, polygon contour, class, and confidence score. */
 export interface Detection {
   box: [number, number, number, number];
   labelId: 1 | 2;
@@ -6,6 +7,7 @@ export interface Detection {
   polygon: [number, number][];
 }
 
+/** Parsed response from the /api/detect proxy: image dimensions plus all detections. */
 export interface DetectionResult {
   imageWidth: number;
   imageHeight: number;
@@ -13,6 +15,7 @@ export interface DetectionResult {
   detections: Detection[];
 }
 
+/** A completed inspection record as persisted to IndexedDB; Blobs are stored natively (not base64). */
 export interface Inspection {
   id: string;
   createdAt: number;

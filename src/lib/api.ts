@@ -20,6 +20,7 @@ interface RawDetectionResponse {
   detections: RawDetection[];
 }
 
+/** Posts a JPEG to the internal /api/detect proxy and returns parsed detection results. */
 export async function detectDents(
   file: File,
   opts: DetectOptions = {}

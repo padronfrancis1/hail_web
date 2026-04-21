@@ -29,6 +29,7 @@ type Action =
   | { type: "INFERENCE_FAILED"; message: string }
   | { type: "RESET" };
 
+/** Pure state machine for the inspection lifecycle; exported for direct unit testing without a React tree. */
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "UPLOAD_STARTED":

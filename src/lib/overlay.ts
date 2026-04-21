@@ -68,6 +68,7 @@ function drawLabel(
   ctx.fillText(text, x1 + padX, top + padY + textH - 1);
 }
 
+/** Draws the source image and all detection polygons onto canvas, resizing it to the image's natural dimensions. */
 export function drawOverlay(
   canvas: HTMLCanvasElement,
   img: HTMLImageElement,
@@ -81,6 +82,8 @@ export function drawOverlay(
   ctx.drawImage(img, 0, 0);
 
   for (const det of detections) {
+    if (det.polygon.length < 3) continue;
+
     const isDent = det.labelId === 1;
     const fill = isDent ? DENT_FILL : FP_FILL;
     const stroke = isDent ? DENT_STROKE : FP_STROKE;
