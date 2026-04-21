@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useState, useCallback, type DragEvent, type ChangeEvent } from "react";
+import { useRef, useState, useCallback, useEffect, type DragEvent, type ChangeEvent } from "react";
 import { Upload, ImageIcon, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useInspection } from "@/context/InspectionContext";
 
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/jpg"];
+const ACCEPTED_TYPES = ["image/jpeg"];
 const MAX_BYTES = 20 * 1024 * 1024; // 20 MB
 
 export function DropZone() {
@@ -22,7 +22,7 @@ export function DropZone() {
 
   function validateFile(file: File): string | null {
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      return "Only JPEG and PNG images are supported.";
+      return "Only JPEG images are supported.";
     }
     if (file.size > MAX_BYTES) {
       return `File is too large (max 20 MB). This file is ${(file.size / 1024 / 1024).toFixed(1)} MB.`;
@@ -65,12 +65,16 @@ export function DropZone() {
     await startInspection(selectedFile);
   }, [selectedFile, startInspection]);
 
+  // F5: Revoke object URL on unmount or when preview changes
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+
   const handleClear = useCallback(() => {
+    if (preview) URL.revokeObjectURL(preview);
     setSelectedFile(null);
     setPreview(null);
     setValidationError(null);
     if (inputRef.current) inputRef.current.value = "";
-  }, []);
+  }, [preview]);
 
   if (preview && selectedFile) {
     return (
@@ -173,13 +177,13 @@ export function DropZone() {
             </span>
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            JPEG or PNG · max 20 MB
+            JPEG only · max 20 MB
           </p>
         </div>
         <input
           ref={inputRef}
           type="file"
-          accept="image/jpeg,image/png"
+          accept="image/jpeg"
           className="sr-only"
           onChange={handleChange}
           aria-hidden

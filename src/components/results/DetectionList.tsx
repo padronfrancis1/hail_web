@@ -40,7 +40,7 @@ export function DetectionList({ detections }: DetectionListProps) {
   return (
     <div className="flex flex-col gap-0 rounded-xl border border-border overflow-hidden">
       {sorted.map((det, idx) => (
-        <div key={idx}>
+        <div key={`${det.labelId}-${det.box.join("-")}-${det.score}`}>
           {idx > 0 && <Separator />}
           <div className="flex items-center gap-3 px-4 py-3 bg-card">
             <div

@@ -15,6 +15,7 @@ export function OverlayCanvas({ imageBlob, onCanvasReady }: OverlayCanvasProps) 
 
   useEffect(() => {
     let url: string | null = null;
+    let cancelled = false;
 
     async function render() {
       if (!canvasRef.current) return;
@@ -28,7 +29,8 @@ export function OverlayCanvas({ imageBlob, onCanvasReady }: OverlayCanvasProps) 
         const ctx = canvas.getContext("2d");
         ctx?.drawImage(img, 0, 0);
         setReady(true);
-        onCanvasReady?.(canvas);
+        // F11: Don't call onCanvasReady if the effect was cleaned up
+        if (!cancelled) onCanvasReady?.(canvas);
       };
       img.onerror = () => setReady(true);
       img.src = url;
@@ -36,6 +38,7 @@ export function OverlayCanvas({ imageBlob, onCanvasReady }: OverlayCanvasProps) 
 
     render();
     return () => {
+      cancelled = true;
       if (url) URL.revokeObjectURL(url);
     };
     // imageBlob identity is stable per inspection load — intentional dep

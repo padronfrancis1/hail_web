@@ -11,7 +11,7 @@ function drawPolygon(
   fill: string,
   stroke: string
 ): void {
-  if (polygon.length < 2) return;
+  if (polygon.length < 3) return;
   ctx.beginPath();
   ctx.moveTo(polygon[0][0], polygon[0][1]);
   for (let i = 1; i < polygon.length; i++) {
@@ -38,11 +38,12 @@ function drawBox(
 
 function drawLabel(
   ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
   box: [number, number, number, number],
   text: string,
   bg: string
 ): void {
-  const [x1, y1] = box;
+  let [x1, y1] = box;
   ctx.font = "bold 12px sans-serif";
   const metrics = ctx.measureText(text);
   const padX = 6;
@@ -51,6 +52,10 @@ function drawLabel(
   const pillW = metrics.width + padX * 2;
   const pillH = textH + padY * 2;
   const top = Math.max(0, y1 - pillH - 2);
+
+  // F13: Clamp label so it never overflows the right or left edge
+  x1 = Math.min(x1, canvas.width - pillW - 2);
+  x1 = Math.max(x1, 2);
 
   ctx.fillStyle = bg;
   ctx.beginPath();
@@ -84,6 +89,6 @@ export function drawOverlay(
     drawBox(ctx, det.box, stroke);
 
     const label = `${det.labelName.replace("_", " ")} ${det.score.toFixed(2)}`;
-    drawLabel(ctx, det.box, label, isDent ? "rgba(239,68,68,1)" : "rgba(245,158,11,1)");
+    drawLabel(ctx, canvas, det.box, label, isDent ? "rgba(239,68,68,1)" : "rgba(245,158,11,1)");
   }
 }

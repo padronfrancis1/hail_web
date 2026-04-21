@@ -10,12 +10,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
+  // F2: Reject oversized bodies before parsing FormData
+  const contentLength = Number(req.headers.get("content-length") ?? 0);
+  if (contentLength > 22_000_000) {
+    return NextResponse.json({ error: "Image too large" }, { status: 413 });
+  }
+
   const formData = await req.formData();
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 125_000);
 
   try {
+    // F3: content-type is intentionally NOT forwarded — undici re-serializes FormData with a fresh multipart boundary, so forwarding the original boundary would corrupt the request.
     const upstream = await fetch(`${CLOUD_RUN_URL}/detect`, {
       method: "POST",
       body: formData,
@@ -26,8 +33,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (!upstream.ok) {
       const text = await upstream.text().catch(() => "Upstream error");
+      // F8: Truncate upstream error body to avoid leaking large responses
       return NextResponse.json(
-        { error: `Upstream error (${upstream.status}): ${text}` },
+        { error: `Upstream error (${upstream.status}): ${text.slice(0, 200)}` },
         { status: upstream.status }
       );
     }

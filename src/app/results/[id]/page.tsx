@@ -20,24 +20,33 @@ export default function ResultsPage({ params }: PageProps) {
   const router = useRouter();
   const [inspection, setInspection] = useState<Inspection | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    getInspection(id).then((data) => {
-      if (data) {
-        setInspection(data);
-      } else {
-        setNotFound(true);
-      }
-    });
+    getInspection(id)
+      .then((data) => {
+        if (data) {
+          setInspection(data);
+        } else {
+          setNotFound(true);
+        }
+      })
+      .catch(() => setLoadError("Could not load this inspection"));
   }, [id]);
 
   const handleDownload = useCallback(() => {
     if (!canvasRef) return;
-    const link = document.createElement("a");
-    link.download = `hail-result-${id.slice(0, 8)}.png`;
-    link.href = canvasRef.toDataURL("image/png");
-    link.click();
+    // F9: toBlob handles large images reliably; toDataURL can silently fail
+    canvasRef.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = `hail-result-${id.slice(0, 8)}.png`;
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
+    }, "image/png");
   }, [canvasRef, id]);
 
   if (notFound) {
@@ -47,6 +56,17 @@ export default function ResultsPage({ params }: PageProps) {
         <p className="text-sm text-muted-foreground">
           This result may have been cleared from local storage.
         </p>
+        <Button variant="outline" onClick={() => router.push("/")}>
+          Start a new inspection
+        </Button>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-20">
+        <p className="text-lg font-semibold">Could not load this inspection</p>
         <Button variant="outline" onClick={() => router.push("/")}>
           Start a new inspection
         </Button>
@@ -82,6 +102,7 @@ export default function ResultsPage({ params }: PageProps) {
           className="gap-1.5"
           onClick={handleDownload}
           disabled={!canvasRef}
+          aria-label="Download result as PNG"
         >
           <Download className="size-3.5" />
           Download PNG

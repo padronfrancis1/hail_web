@@ -29,7 +29,7 @@ type Action =
   | { type: "INFERENCE_FAILED"; message: string }
   | { type: "RESET" };
 
-function reducer(state: State, action: Action): State {
+export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "UPLOAD_STARTED":
       return { phase: "uploading", file: action.file };

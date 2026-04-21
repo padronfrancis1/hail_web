@@ -27,10 +27,9 @@ export async function detectDents(
   const { preprocess = true, scoreThreshold = 0.3 } = opts;
 
   const form = new FormData();
-  // Cloud Run requires filename to end in .jpg/.jpeg
-  const blob = file.slice(0, file.size, "image/jpeg");
+  // Only JPEG is accepted; append directly without type-coercion
   const filename = file.name.replace(/\.[^.]+$/, "") + ".jpg";
-  form.append("image", blob, filename);
+  form.append("image", file, filename);
   form.append("preprocess", String(preprocess));
   form.append("score_threshold", String(scoreThreshold));
   form.append("return_image", "false");

@@ -11,10 +11,19 @@ import type { Inspection } from "@/lib/types";
 
 export function InspectionGrid() {
   const [inspections, setInspections] = useState<Inspection[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    listInspections().then(setInspections);
+    listInspections().then(setInspections).catch(() => setLoadError("Could not load inspections"));
   }, []);
+
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-6 text-center text-sm text-destructive">
+        {loadError}
+      </div>
+    );
+  }
 
   if (inspections === null) {
     return (
