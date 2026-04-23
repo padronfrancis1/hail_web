@@ -1,5 +1,3 @@
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import type { Detection } from "@/lib/types";
 
 interface SummaryBarProps {
@@ -7,6 +5,35 @@ interface SummaryBarProps {
   imageWidth: number;
   imageHeight: number;
   filename: string;
+}
+
+interface StatCellProps {
+  value: string;
+  label: string;
+  accent?: boolean;
+}
+
+function StatCell({ value, label, accent = false }: StatCellProps) {
+  return (
+    <div className="flex flex-col gap-1 min-w-0">
+      <span
+        className={`font-mono text-2xl font-medium tabular-nums leading-none ${
+          accent ? "text-brand" : "text-foreground"
+        }`}
+      >
+        {value}
+      </span>
+      <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function Divider() {
+  return (
+    <div className="hidden h-10 w-px shrink-0 bg-border/60 sm:block" />
+  );
 }
 
 export function SummaryBar({
@@ -23,53 +50,42 @@ export function SummaryBar({
       : 0;
 
   return (
-    <div className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card px-5 py-4">
-      <div className="flex flex-col">
-        <span className="text-3xl font-bold text-foreground">
-          {dents.length}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {dents.length === 1 ? "dent" : "dents"} detected
-        </span>
-      </div>
+    <div className="flex flex-wrap items-center gap-x-8 gap-y-4 rounded-2xl border border-border/50 bg-card/60 px-6 py-5">
+      <StatCell
+        value={String(dents.length)}
+        label={dents.length === 1 ? "Dent detected" : "Dents detected"}
+        accent={dents.length > 0}
+      />
 
-      <Separator orientation="vertical" className="h-10 hidden sm:block" />
+      <Divider />
 
       {dents.length > 0 && (
         <>
-          <div className="flex flex-col">
-            <span className="text-xl font-semibold text-foreground">
-              {(avgConf * 100).toFixed(0)}%
-            </span>
-            <span className="text-xs text-muted-foreground">avg confidence</span>
-          </div>
-          <Separator orientation="vertical" className="h-10 hidden sm:block" />
+          <StatCell
+            value={`${(avgConf * 100).toFixed(0)}%`}
+            label="Avg confidence"
+          />
+          <Divider />
         </>
       )}
 
       {fps.length > 0 && (
         <>
-          <div className="flex flex-col">
-            <span className="text-xl font-semibold text-amber-500">
-              {fps.length}
-            </span>
-            <span className="text-xs text-muted-foreground">false positive</span>
-          </div>
-          <Separator orientation="vertical" className="h-10 hidden sm:block" />
+          <StatCell value={String(fps.length)} label="False positive" />
+          <Divider />
         </>
       )}
 
-      <div className="flex flex-col">
-        <span className="text-sm font-medium text-foreground">
-          {imageWidth} × {imageHeight}
-        </span>
-        <span className="text-xs text-muted-foreground">image dimensions</span>
-      </div>
+      <StatCell
+        value={`${imageWidth} × ${imageHeight}`}
+        label="Image dimensions"
+      />
 
-      <div className="ml-auto flex flex-wrap gap-2">
-        <Badge variant="outline" className="text-xs truncate max-w-[180px]">
+      {/* Filename pushed to right */}
+      <div className="ml-auto min-w-0">
+        <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground truncate max-w-[200px]">
           {filename}
-        </Badge>
+        </p>
       </div>
     </div>
   );

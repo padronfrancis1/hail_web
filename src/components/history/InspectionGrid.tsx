@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CloudLightning } from "lucide-react";
+import { Scan } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InspectionCard } from "@/components/history/InspectionCard";
@@ -14,12 +14,14 @@ export function InspectionGrid() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    listInspections().then(setInspections).catch(() => setLoadError("Could not load inspections"));
+    listInspections()
+      .then(setInspections)
+      .catch(() => setLoadError("Could not load inspections"));
   }, []);
 
   if (loadError) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-6 text-center text-sm text-destructive">
+      <div className="flex flex-col items-center gap-2 rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-6 text-center text-sm text-destructive">
         {loadError}
       </div>
     );
@@ -29,7 +31,7 @@ export function InspectionGrid() {
     return (
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="aspect-video w-full rounded-xl" />
+          <Skeleton key={i} className="aspect-video w-full rounded-2xl" />
         ))}
       </div>
     );
@@ -37,12 +39,14 @@ export function InspectionGrid() {
 
   if (inspections.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-5 rounded-2xl border border-dashed border-border bg-muted/30 px-8 py-20 text-center">
-        <div className="flex size-16 items-center justify-center rounded-2xl bg-muted">
-          <CloudLightning className="size-8 text-muted-foreground" />
+      <div className="flex flex-col items-center gap-5 rounded-2xl border border-dashed border-border/50 bg-card/20 px-8 py-20 text-center">
+        <div className="flex size-16 items-center justify-center rounded-2xl border border-border/50 bg-muted/40">
+          <Scan className="size-7 text-muted-foreground" />
         </div>
         <div>
-          <p className="text-base font-semibold">No inspections yet</p>
+          <p className="text-base font-medium text-foreground">
+            No inspections yet
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">
             Upload an image to run your first hail damage inspection.
           </p>
@@ -50,7 +54,7 @@ export function InspectionGrid() {
         <Link href="/">
           <Button
             size="sm"
-            className="bg-red-500 hover:bg-red-600 text-white border-transparent"
+            className="bg-brand hover:bg-brand/90 text-brand-foreground border-transparent"
           >
             Start an inspection
           </Button>

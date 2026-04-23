@@ -50,7 +50,7 @@ export function OverlayCanvas({ imageBlob, onCanvasReady }: OverlayCanvasProps) 
       {!ready && <Skeleton className="w-full aspect-video rounded-xl" />}
       <canvas
         ref={canvasRef}
-        className="w-full rounded-xl border border-border shadow-sm"
+        className="w-full"
         style={{ display: ready ? "block" : "none" }}
       />
     </div>

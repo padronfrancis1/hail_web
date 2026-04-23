@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import { Download, ArrowLeft, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OverlayCanvas } from "@/components/results/OverlayCanvas";
@@ -14,6 +15,19 @@ import type { Inspection } from "@/lib/types";
 interface PageProps {
   params: Promise<{ id: string }>;
 }
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 14 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.38,
+      delay: i * 0.08,
+      ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+    },
+  }),
+};
 
 export default function ResultsPage({ params }: PageProps) {
   const { id } = use(params);
@@ -37,7 +51,7 @@ export default function ResultsPage({ params }: PageProps) {
 
   const handleDownload = useCallback(() => {
     if (!canvasRef) return;
-    // F9: toBlob handles large images reliably; toDataURL can silently fail
+    // toBlob handles large images reliably; toDataURL can silently fail
     canvasRef.toBlob((blob) => {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
@@ -84,61 +98,73 @@ export default function ResultsPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
-      {/* Back + actions */}
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-1.5"
+      {/* ── Top bar ── */}
+      <div className="mb-5 flex items-center justify-between gap-2">
+        <button
           onClick={() => router.push("/")}
+          className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
         >
-          <ArrowLeft className="size-3.5" />
-          New Inspection
-        </Button>
+          <ArrowLeft className="size-4" />
+          <span className="text-sm">New inspection</span>
+        </button>
 
         <Button
           variant="outline"
           size="sm"
-          className="gap-1.5"
           onClick={handleDownload}
           disabled={!canvasRef}
           aria-label="Download result as PNG"
+          className="gap-1.5 border-brand/40 hover:bg-brand/10 text-brand hover:text-brand"
         >
           <Download className="size-3.5" />
           Download PNG
         </Button>
       </div>
 
-      {/* Summary */}
-      <div className="mb-6">
+      {/* ── Summary bar ── */}
+      <motion.div
+        className="mb-6"
+        custom={0}
+        variants={fadeUp}
+        initial="hidden"
+        animate="visible"
+      >
         <SummaryBar
           detections={inspection.detections}
           imageWidth={inspection.imageWidth}
           imageHeight={inspection.imageHeight}
           filename={inspection.filename}
         />
-      </div>
+      </motion.div>
 
-      {/* Main content: canvas + detection list */}
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        <div>
+      {/* ── Main content: canvas + detection list ── */}
+      <motion.div
+        className="grid gap-6 lg:grid-cols-[1fr_320px]"
+        custom={1}
+        variants={fadeUp}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Canvas frame */}
+        <div className="rounded-2xl border border-border/50 overflow-hidden">
           {inspection.overlayImage ? (
             <OverlayCanvas
               imageBlob={inspection.overlayImage}
               onCanvasReady={setCanvasRef}
             />
           ) : (
-            <Skeleton className="aspect-video w-full rounded-xl" />
+            <Skeleton className="aspect-video w-full rounded-none" />
           )}
         </div>
 
-        <div className="flex flex-col gap-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Detections ({inspection.detections.length})
+        {/* Detection sidebar */}
+        <div className="flex flex-col gap-3">
+          <h2 className="font-mono text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+            Detections&nbsp;({inspection.detections.length})
           </h2>
           <DetectionList detections={inspection.detections} />
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
