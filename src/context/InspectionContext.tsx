@@ -86,9 +86,26 @@ export function InspectionProvider({ children }: { children: ReactNode }) {
         const overlayCanvas = document.createElement("canvas");
         drawOverlay(overlayCanvas, img, result.detections);
 
-        const [overlayBlob, thumbnail] = await Promise.all([
+        // Build the preprocessed overlay in parallel with the primary blob + thumbnail
+        const preprocessedOverlayPromise: Promise<Blob | undefined> = (async () => {
+          if (!result.preprocessedImageB64) return undefined;
+          const preBytes = base64ToBytes(result.preprocessedImageB64);
+          const preBlob = new Blob([preBytes.buffer as ArrayBuffer], { type: "image/jpeg" });
+          const preUrl = URL.createObjectURL(preBlob);
+          try {
+            const preImg = await loadImage(preUrl);
+            const preCanvas = document.createElement("canvas");
+            drawOverlay(preCanvas, preImg, result.detections);
+            return await canvasToBlob(preCanvas);
+          } finally {
+            URL.revokeObjectURL(preUrl);
+          }
+        })();
+
+        const [overlayBlob, thumbnail, preprocessedOverlayBlob] = await Promise.all([
           canvasToBlob(overlayCanvas),
           generateThumbnail(overlayCanvas),
+          preprocessedOverlayPromise,
         ]);
 
         const inspection: Inspection = {
@@ -101,6 +118,7 @@ export function InspectionProvider({ children }: { children: ReactNode }) {
           overlayImage: overlayBlob,
           thumbnail,
           detections: result.detections,
+          preprocessedOverlay: preprocessedOverlayBlob,
         };
 
         await saveInspection(inspection);
@@ -147,4 +165,11 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
       0.92
     );
   });
+}
+
+function base64ToBytes(b64: string): Uint8Array {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
 }

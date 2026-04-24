@@ -13,6 +13,8 @@ export interface DetectionResult {
   imageHeight: number;
   numDetections: number;
   detections: Detection[];
+  /** Base64-encoded grayscale JPEG from the server's preprocessing step. Only present when the backend returns it. */
+  preprocessedImageB64?: string;
 }
 
 /** A completed inspection record as persisted to IndexedDB; Blobs are stored natively (not base64). */
@@ -26,4 +28,6 @@ export interface Inspection {
   overlayImage: Blob;
   thumbnail: Blob;
   detections: Detection[];
+  /** Overlay-annotated version of the grayscale preprocessed image. Optional: absent for older saved inspections. */
+  preprocessedOverlay?: Blob;
 }

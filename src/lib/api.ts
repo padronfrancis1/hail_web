@@ -18,6 +18,7 @@ interface RawDetectionResponse {
   image_height: number;
   num_detections: number;
   detections: RawDetection[];
+  preprocessed_image_b64?: string;
 }
 
 /** Posts a JPEG to the internal /api/detect proxy and returns parsed detection results. */
@@ -34,6 +35,7 @@ export async function detectDents(
   form.append("preprocess", String(preprocess));
   form.append("score_threshold", String(scoreThreshold));
   form.append("return_image", "false");
+  form.append("return_preprocessed", "true");
 
   const res = await fetch("/api/detect", {
     method: "POST",
@@ -60,5 +62,6 @@ export async function detectDents(
     imageHeight: raw.image_height,
     numDetections: raw.num_detections,
     detections,
+    preprocessedImageB64: raw.preprocessed_image_b64,
   };
 }

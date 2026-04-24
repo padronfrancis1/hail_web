@@ -10,6 +10,7 @@ import { OverlayCanvas } from "@/components/results/OverlayCanvas";
 import { DetectionList } from "@/components/results/DetectionList";
 import { SummaryBar } from "@/components/results/SummaryBar";
 import { getInspection } from "@/lib/db";
+import { cn } from "@/lib/utils";
 import type { Inspection } from "@/lib/types";
 
 interface PageProps {
@@ -36,6 +37,7 @@ export default function ResultsPage({ params }: PageProps) {
   const [notFound, setNotFound] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
+  const [view, setView] = useState<"original" | "preprocessed">("original");
 
   useEffect(() => {
     getInspection(id)
@@ -146,15 +148,51 @@ export default function ResultsPage({ params }: PageProps) {
         animate="visible"
       >
         {/* Canvas frame */}
-        <div className="rounded-2xl border border-border/50 overflow-hidden">
-          {inspection.overlayImage ? (
-            <OverlayCanvas
-              imageBlob={inspection.overlayImage}
-              onCanvasReady={setCanvasRef}
-            />
-          ) : (
-            <Skeleton className="aspect-video w-full rounded-none" />
-          )}
+        <div>
+          {/* View toggle — only shown when a preprocessed overlay is available */}
+          <div className="mb-3 flex items-center gap-2">
+            {inspection.preprocessedOverlay && (
+              <div className="inline-flex rounded-lg border border-border/60 bg-muted/20 p-0.5">
+                <button
+                  onClick={() => setView("original")}
+                  className={cn(
+                    "rounded-md px-3 py-1 text-xs font-mono uppercase tracking-widest transition",
+                    view === "original"
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Original
+                </button>
+                <button
+                  onClick={() => setView("preprocessed")}
+                  className={cn(
+                    "rounded-md px-3 py-1 text-xs font-mono uppercase tracking-widest transition",
+                    view === "preprocessed"
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Preprocessed
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-border/50 overflow-hidden">
+            {inspection.overlayImage ? (
+              <OverlayCanvas
+                imageBlob={
+                  view === "preprocessed" && inspection.preprocessedOverlay
+                    ? inspection.preprocessedOverlay
+                    : inspection.overlayImage
+                }
+                onCanvasReady={setCanvasRef}
+              />
+            ) : (
+              <Skeleton className="aspect-video w-full rounded-none" />
+            )}
+          </div>
         </div>
 
         {/* Detection sidebar */}
