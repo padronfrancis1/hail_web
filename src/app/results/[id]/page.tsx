@@ -197,7 +197,7 @@ export default function ResultsPage({ params }: PageProps) {
 
         {/* Detection sidebar */}
         <div className="flex flex-col gap-3">
-          <h2 className="font-mono text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+          <h2 className="font-mono text-sm font-medium uppercase tracking-widest text-muted-foreground">
             Detections&nbsp;({inspection.detections.length})
           </h2>
           <DetectionList detections={inspection.detections} />

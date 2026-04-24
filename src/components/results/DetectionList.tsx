@@ -43,7 +43,7 @@ export function DetectionList({ detections }: DetectionListProps) {
         <div
           key={`${det.labelId}-${det.box.join("-")}-${det.score}`}
           className={cn(
-            "flex items-center gap-3 px-4 py-3 transition-colors duration-100",
+            "flex items-center gap-3 px-4 py-4 transition-colors duration-100",
             idx % 2 === 0 ? "bg-card/40" : "bg-card/20",
             "hover:bg-muted/40"
           )}
@@ -58,10 +58,10 @@ export function DetectionList({ detections }: DetectionListProps) {
 
           {/* Label + box coords */}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium capitalize leading-tight">
+            <p className="text-base font-medium capitalize leading-tight">
               {det.labelName.replace("_", " ")}
             </p>
-            <p className="font-mono text-[10px] text-muted-foreground mt-0.5 truncate">
+            <p className="font-mono text-xs text-muted-foreground mt-1 truncate">
               [{det.box.map((v) => Math.round(v)).join(", ")}]
             </p>
           </div>
@@ -69,7 +69,7 @@ export function DetectionList({ detections }: DetectionListProps) {
           {/* Mono score */}
           <span
             className={cn(
-              "font-mono text-xs font-semibold tabular-nums shrink-0",
+              "font-mono text-base font-semibold tabular-nums shrink-0",
               scoreBadgeClass(det.score)
             )}
           >

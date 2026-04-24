@@ -23,7 +23,7 @@ function StatCell({ value, label, accent = false }: StatCellProps) {
       >
         {value}
       </span>
-      <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
+      <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground whitespace-nowrap">
         {label}
       </span>
     </div>
@@ -83,7 +83,7 @@ export function SummaryBar({
 
       {/* Filename pushed to right */}
       <div className="ml-auto min-w-0">
-        <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground truncate max-w-[200px]">
+        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground truncate max-w-[200px]">
           {filename}
         </p>
       </div>
